@@ -1024,7 +1024,8 @@ const JobOrdersPage = () => {
 							<Chip
 								icon={getStatusIcon(viewOrder.status)}
 								label={viewOrder.status}
-								color={getStatusChipColor(viewOrder.status) as unknown}
+								// eslint-disable-next-line @typescript-eslint/no-explicit-any
+								color={getStatusChipColor(viewOrder.status) as any}
 								size='small'
 							/>
 						)}
