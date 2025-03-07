@@ -1024,7 +1024,7 @@ const JobOrdersPage = () => {
 							<Chip
 								icon={getStatusIcon(viewOrder.status)}
 								label={viewOrder.status}
-								color={getStatusChipColor(viewOrder.status) as any}
+								color={getStatusChipColor(viewOrder.status) as unknown}
 								size='small'
 							/>
 						)}

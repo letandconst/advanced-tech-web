@@ -20,7 +20,6 @@ import {
 	People as PeopleIcon,
 	BarChart as BarChartIcon,
 	Layers as LayersIcon,
-	Settings as SettingsIcon,
 	Logout as LogoutIcon,
 	ExpandLess,
 	ExpandMore,
