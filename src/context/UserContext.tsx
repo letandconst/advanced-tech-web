@@ -4,7 +4,6 @@ import { ref, get } from 'firebase/database';
 import { auth, db } from '@/services/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/router';
-import Loader from '@/components/Loader/Loader';
 
 interface User {
 	uid: string;
@@ -29,7 +28,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // Context Provider
 export function UserProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState(true);
+
 	const router = useRouter();
 
 	useEffect(() => {
@@ -52,7 +51,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 			} else {
 				setUser(null);
 			}
-			setLoading(false);
 		});
 
 		return () => unsubscribe();
@@ -67,14 +65,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
 			console.error('Logout failed:', error);
 		}
 	};
-
-	// if (loading)
-	// 	return (
-	// 		<Loader
-	// 			open={true}
-	// 			message='Loading...'
-	// 		/>
-	// 	);
 
 	return <UserContext.Provider value={{ user, setUser, logout }}>{children}</UserContext.Provider>;
 }

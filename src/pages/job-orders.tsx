@@ -1010,7 +1010,7 @@ const JobOrdersPage = () => {
 					</Table>
 				</TableContainer>
 			</Card>
-			;
+
 			<Dialog
 				open={Boolean(viewOrder)}
 				onClose={handleViewClose}
@@ -1282,7 +1282,7 @@ const JobOrdersPage = () => {
 					</Button>
 				</DialogActions>
 			</Dialog>
-			;
+
 			<Dialog
 				open={newOrderOpen}
 				onClose={handleNewOrderClose}
@@ -2490,7 +2490,7 @@ const JobOrdersPage = () => {
 					)}
 				</DialogActions>
 			</Dialog>
-			;
+
 			<Dialog
 				open={deleteConfirmOpen}
 				onClose={handleDeleteConfirmClose}
