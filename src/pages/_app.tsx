@@ -1,21 +1,54 @@
-import CssBaseline from '@mui/material/CssBaseline';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/services/firebase';
+import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from '@/theme/theme';
-import type { AppProps } from 'next/app';
-import { Nunito_Sans } from 'next/font/google';
-
 import Layout from '@/components/Layout/Layout';
-
-const nunitoSans = Nunito_Sans({ subsets: ['latin'], variable: '--font-nunito-sans' });
+import { UserProvider } from '@/context/UserContext';
+import { AppProps } from 'next/app';
+import Loader from '@/components/Loader/Loader';
 
 export default function App({ Component, pageProps }: AppProps) {
+	const router = useRouter();
+
+	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+	useEffect(() => {
+		const unsubscribe = onAuthStateChanged(auth, (user) => {
+			setIsAuthenticated(!!user);
+
+			const publicRoutes = ['/login', '/forgot-password'];
+			if (!user && !publicRoutes.includes(router.pathname)) {
+				router.replace('/login');
+			} else if (user && publicRoutes.includes(router.pathname)) {
+				router.replace('/');
+			}
+		});
+
+		return () => unsubscribe();
+	}, [router]);
+
+	const authRoutes = ['/login', '/forgot-password'];
+	const isAuthPage = authRoutes.includes(router.pathname);
+
 	return (
-		<main className={`${nunitoSans.variable} font-sans`}>
-			<ThemeProvider>
-				<CssBaseline />
-				<Layout>
+		<ThemeProvider>
+			<CssBaseline />
+			<UserProvider>
+				{isAuthPage ? (
 					<Component {...pageProps} />
-				</Layout>
-			</ThemeProvider>
-		</main>
+				) : isAuthenticated ? (
+					<Layout>
+						<Component {...pageProps} />
+					</Layout>
+				) : (
+					<Loader
+						open={true}
+						message='Loading...'
+					/>
+				)}
+			</UserProvider>
+		</ThemeProvider>
 	);
 }

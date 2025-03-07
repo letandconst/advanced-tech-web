@@ -4,6 +4,7 @@ import React from 'react';
 import { Grid, Paper, Typography, Box, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Chip, IconButton, Tooltip, Avatar, useTheme, useMediaQuery } from '@mui/material';
 import { MoreHoriz as MoreHorizIcon, Visibility as VisibilityIcon, ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon, DirectionsCar as CarIcon, Person as PersonIcon, Build as BuildIcon } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useUser } from '@/context/UserContext';
 
 // Create sample data for work requests
 interface WorkRequest {
@@ -219,6 +220,7 @@ export default function Dashboard() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 	const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
+	const { user } = useUser();
 
 	const handleViewDetail = (id: number) => {
 		console.log(`View details for request ID: ${id}`);
@@ -226,7 +228,7 @@ export default function Dashboard() {
 	};
 
 	// Mock user data
-	const userName = 'John';
+	const userName = user?.firstName;
 
 	return (
 		<Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -263,7 +265,7 @@ export default function Dashboard() {
 									fontWeight='bold'
 									gutterBottom
 								>
-									Welcome, {userName}!
+									Hi, {userName}!
 								</Typography>
 								<Typography variant='body1'>Here&apos;s what&apos;s happening in your service center today.</Typography>
 							</Grid>

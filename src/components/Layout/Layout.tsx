@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { styled, useTheme } from '@mui/material/styles';
 import { useThemeContext } from '@/theme/theme';
+import { useUser } from '@/context/UserContext';
 
 // MUI Components
 import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Tooltip, Avatar, Menu, MenuItem, useMediaQuery, Badge, Paper } from '@mui/material';
@@ -88,6 +89,8 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 	const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
 	const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
 
+	const { user, logout } = useUser();
+
 	// Set initial submenu state based on active path
 	useEffect(() => {
 		menuItems.forEach((item) => {
@@ -121,6 +124,11 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
 	const handleUserMenuClose = () => {
 		setUserMenuAnchor(null);
+	};
+
+	const handleLogout = async () => {
+		handleUserMenuClose(); // Close menu
+		await logout(); // Call logout function
 	};
 
 	const handleNotificationOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -157,14 +165,6 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 					>
 						<MenuIcon />
 					</IconButton>
-
-					<Typography
-						variant='h6'
-						color='textPrimary'
-						sx={{ display: { xs: 'none', sm: 'block' } }}
-					>
-						Advanced Tech
-					</Typography>
 
 					<Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
 						<Tooltip title='Notifications'>
@@ -480,7 +480,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 									noWrap
 									fontWeight={600}
 								>
-									John Doe
+									{user?.firstName} {user?.lastName}
 								</Typography>
 								<Typography
 									variant='caption'
@@ -516,7 +516,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 					</MenuItem>
 					<Divider />
 					<MenuItem
-						onClick={handleUserMenuClose}
+						onClick={handleLogout}
 						sx={{ gap: 1.5 }}
 					>
 						<LogoutIcon fontSize='small' />
