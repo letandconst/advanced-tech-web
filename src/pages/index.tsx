@@ -525,7 +525,7 @@ export default function Dashboard() {
 											<TableCell>
 												<Chip
 													label={request.status}
-													color={getStatusColor(request.status) as any}
+													color={getStatusColor(request.status) as unknown}
 													size='small'
 													sx={{ fontWeight: 'medium', borderRadius: '4px' }}
 												/>
