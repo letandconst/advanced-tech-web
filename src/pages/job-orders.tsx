@@ -729,7 +729,7 @@ const JobOrdersPage = () => {
 	};
 
 	return (
-		<Box sx={{ p: { xs: 2, md: 3 }, maxWidth: '1200px', mx: 'auto' }}>
+		<Box sx={{ p: { xs: 2, md: 3 } }}>
 			<Box sx={{ mb: 4 }}>
 				<Typography
 					variant='h5'
