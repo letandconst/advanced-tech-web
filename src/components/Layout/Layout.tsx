@@ -1,13 +1,13 @@
 'use client';
 
-import * as React from 'react';
+import React, { useState, useEffect, MouseEvent } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { styled, useTheme } from '@mui/material/styles';
-import { deepPurple } from '@mui/material/colors';
 import { useThemeContext } from '@/theme/theme';
 
 // MUI Components
-import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Menu, MenuItem, Avatar, Tooltip } from '@mui/material';
+import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Tooltip, Avatar, Menu, MenuItem, useMediaQuery, Badge, Paper } from '@mui/material';
 
 import MuiAppBar, { type AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 
@@ -27,9 +27,11 @@ import {
 	LightMode as LightModeIcon,
 	DarkMode as DarkModeIcon,
 	Build as BuildIcon,
+	Notifications as NotificationsIcon,
+	Person as PersonIcon,
 } from '@mui/icons-material';
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 interface AppBarProps extends MuiAppBarProps {
 	open?: boolean;
@@ -42,6 +44,7 @@ const AppBar = styled(MuiAppBar, {
 		easing: theme.transitions.easing.sharp,
 		duration: theme.transitions.duration.leavingScreen,
 	}),
+	boxShadow: theme.shadows[3],
 	...(open && {
 		width: `calc(100% - ${drawerWidth}px)`,
 		marginLeft: `${drawerWidth}px`,
@@ -57,85 +60,83 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 	alignItems: 'center',
 	padding: theme.spacing(0, 1),
 	...theme.mixins.toolbar,
-	justifyContent: 'flex-end',
+	justifyContent: 'space-between',
 }));
+
+const menuItems = [
+	{ text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+	{ text: 'Job Orders', icon: <BuildIcon />, path: '/job-orders' },
+	{ text: 'Invoices', icon: <BarChartIcon />, path: '/invoices' },
+	{ text: 'Services', icon: <LayersIcon />, path: '/services' },
+	{
+		text: 'Management',
+		icon: <PeopleIcon />,
+		subItems: [
+			{ text: 'Mechanics', path: '/management/mechanics' },
+			{ text: 'Users', path: '/management/users' },
+		],
+	},
+];
 
 export default function SidebarLayout({ children }: { children: React.ReactNode }) {
 	const theme = useTheme();
 	const { mode, toggleTheme } = useThemeContext();
-	const [open, setOpen] = React.useState(true);
+	const pathname = usePathname();
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+	const [open, setOpen] = useState(!isMobile);
+	const [openSubMenus, setOpenSubMenus] = useState<{ [key: string]: boolean }>({});
+	const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+	const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
+
+	// Set initial submenu state based on active path
+	useEffect(() => {
+		menuItems.forEach((item) => {
+			if (item.subItems) {
+				const isSubItemActive = item.subItems.some((subItem) => pathname === subItem.path);
+				if (isSubItemActive) {
+					setOpenSubMenus((prev) => ({ ...prev, [item.text]: true }));
+				}
+			}
+		});
+	}, [pathname]);
+
+	// Handle responsive drawer
+	useEffect(() => {
+		setOpen(!isMobile);
+	}, [isMobile]);
 
 	const handleDrawerOpen = () => setOpen(true);
 	const handleDrawerClose = () => setOpen(false);
 
-	const [menuItems, setMenuItems] = React.useState([
-		{ text: 'Dashboard', icon: <DashboardIcon />, path: '/', active: true },
-		{ text: 'Job Orders', icon: <BuildIcon />, path: '/job-orders', active: false },
-		{ text: 'Invoices', icon: <BarChartIcon />, path: '/invoices', active: false },
-		{ text: 'Services', icon: <LayersIcon />, path: '/services', active: false },
-		{
-			text: 'Management',
-			icon: <PeopleIcon />,
-			active: false,
-			subItems: [
-				{ text: 'Mechanics', path: '/management/mechanics', active: false },
-				{ text: 'Users', path: '/management/users', active: false },
-			],
-			open: false,
-		},
-	]);
-
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const userMenuOpen = Boolean(anchorEl);
-
-	const handleUserMenuClick = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
-	const handleUserMenuClose = () => setAnchorEl(null);
-
-	const handleMenuItemClick = (text: string, index: number) => {
-		const newMenuItems = [...menuItems];
-
-		// Reset all active states
-		newMenuItems.forEach((item) => {
-			item.active = false;
-			if (item.subItems) {
-				item.subItems.forEach((subItem) => {
-					subItem.active = false;
-				});
-			}
-
-			if (item.open) {
-				item.open = false;
-			}
-		});
-
-		// Set the clicked item as active
-		newMenuItems[index].active = true;
-
-		setMenuItems(newMenuItems);
+	const handleSubMenuToggle = (text: string) => {
+		setOpenSubMenus((prev) => ({
+			...prev,
+			[text]: !prev[text],
+		}));
 	};
 
-	const handleSubMenuItemClick = (parentIndex: number, subIndex: number) => {
-		const newMenuItems = [...menuItems];
+	const handleUserMenuOpen = (event: MouseEvent<HTMLElement>) => {
+		setUserMenuAnchor(event.currentTarget);
+	};
 
-		// Reset all active states
-		newMenuItems.forEach((item) => {
-			item.active = false;
-			item.subItems?.forEach((subItem) => {
-				subItem.active = false;
-			});
-		});
+	const handleUserMenuClose = () => {
+		setUserMenuAnchor(null);
+	};
 
-		if (newMenuItems[parentIndex]?.subItems) {
-			newMenuItems[parentIndex].subItems[subIndex].active = true;
+	const handleNotificationOpen = (event: React.MouseEvent<HTMLElement>) => {
+		setNotificationAnchor(event.currentTarget);
+	};
 
-			setMenuItems(newMenuItems);
+	const handleNotificationClose = () => {
+		setNotificationAnchor(null);
+	};
+
+	const isActive = (path: string) => {
+		if (path === '/') {
+			return pathname === path;
 		}
-	};
-
-	const toggleSubMenu = (index: number) => {
-		const newMenuItems = [...menuItems];
-		newMenuItems[index].open = !newMenuItems[index].open;
-		setMenuItems(newMenuItems);
+		return pathname.startsWith(path);
 	};
 
 	return (
@@ -144,6 +145,8 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 			<AppBar
 				position='fixed'
 				open={open}
+				color='default'
+				elevation={1}
 			>
 				<Toolbar>
 					<IconButton
@@ -156,7 +159,81 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 						<MenuIcon />
 					</IconButton>
 
-					<Box sx={{ ml: 'auto' }}>
+					<Typography
+						variant='h6'
+						color='textPrimary'
+						sx={{ display: { xs: 'none', sm: 'block' } }}
+					>
+						Advanced Tech
+					</Typography>
+
+					<Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+						<Tooltip title='Notifications'>
+							<IconButton
+								color='inherit'
+								onClick={handleNotificationOpen}
+							>
+								<Badge
+									badgeContent={3}
+									color='error'
+								>
+									<NotificationsIcon />
+								</Badge>
+							</IconButton>
+						</Tooltip>
+
+						<Menu
+							anchorEl={notificationAnchor}
+							open={Boolean(notificationAnchor)}
+							onClose={handleNotificationClose}
+							PaperProps={{
+								elevation: 3,
+								sx: { width: 320, maxHeight: 400, mt: 1.5 },
+							}}
+							transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+							anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+						>
+							<Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+								<Typography
+									variant='subtitle1'
+									fontWeight='bold'
+								>
+									Notifications
+								</Typography>
+							</Box>
+							{[1, 2, 3].map((item) => (
+								<MenuItem
+									key={item}
+									onClick={handleNotificationClose}
+									sx={{ py: 1.5 }}
+								>
+									<Box sx={{ display: 'flex', flexDirection: 'column' }}>
+										<Typography
+											variant='body2'
+											fontWeight='medium'
+										>
+											New job order #{item} has been created
+										</Typography>
+										<Typography
+											variant='caption'
+											color='text.secondary'
+										>
+											{item} hour{item > 1 ? 's' : ''} ago
+										</Typography>
+									</Box>
+								</MenuItem>
+							))}
+							<Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}`, textAlign: 'center' }}>
+								<Typography
+									variant='body2'
+									color='primary'
+									sx={{ cursor: 'pointer' }}
+								>
+									View all notifications
+								</Typography>
+							</Box>
+						</Menu>
+
 						<Tooltip title={`Switch to ${mode === 'light' ? 'dark' : 'light'} mode`}>
 							<IconButton
 								color='inherit'
@@ -165,81 +242,10 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 								{mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
 							</IconButton>
 						</Tooltip>
-						<IconButton
-							onClick={handleUserMenuClick}
-							size='small'
-							sx={{ ml: 1 }}
-							aria-controls={userMenuOpen ? 'account-menu' : undefined}
-							aria-haspopup='true'
-							aria-expanded={userMenuOpen ? 'true' : undefined}
-						>
-							<Avatar sx={{ bgcolor: deepPurple[500] }}>JD</Avatar>
-						</IconButton>
-						<Menu
-							anchorEl={anchorEl}
-							id='account-menu'
-							open={userMenuOpen}
-							onClose={handleUserMenuClose}
-							onClick={handleUserMenuClose}
-							PaperProps={{
-								elevation: 0,
-								sx: {
-									overflow: 'visible',
-									filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-									mt: 1.5,
-									'& .MuiAvatar-root': {
-										width: 32,
-										height: 32,
-										ml: -0.5,
-										mr: 1,
-									},
-									'&:before': {
-										content: '""',
-										display: 'block',
-										position: 'absolute',
-										top: 0,
-										right: 14,
-										width: 10,
-										height: 10,
-										bgcolor: 'background.paper',
-										transform: 'translateY(-50%) rotate(45deg)',
-										zIndex: 0,
-									},
-								},
-							}}
-							transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-							anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-						>
-							<MenuItem
-								onClick={handleUserMenuClose}
-								disabled
-							>
-								<Avatar sx={{ bgcolor: deepPurple[500] }} /> John Doe
-							</MenuItem>
-							<MenuItem
-								onClick={handleUserMenuClose}
-								disabled
-								sx={{ typography: 'body2', pl: 7, pt: 0, color: 'text.secondary' }}
-							>
-								john.doe@example.com
-							</MenuItem>
-							<Divider />
-							<MenuItem onClick={handleUserMenuClose}>
-								<ListItemIcon>
-									<SettingsIcon fontSize='small' />
-								</ListItemIcon>
-								Settings
-							</MenuItem>
-							<MenuItem onClick={handleUserMenuClose}>
-								<ListItemIcon>
-									<LogoutIcon fontSize='small' />
-								</ListItemIcon>
-								Logout
-							</MenuItem>
-						</Menu>
 					</Box>
 				</Toolbar>
 			</AppBar>
+
 			<Drawer
 				sx={{
 					width: drawerWidth,
@@ -247,109 +253,288 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 					'& .MuiDrawer-paper': {
 						width: drawerWidth,
 						boxSizing: 'border-box',
+						borderRight: `1px solid ${theme.palette.divider}`,
+						boxShadow: theme.shadows[1],
 					},
 				}}
-				variant='persistent'
+				variant={isMobile ? 'temporary' : 'persistent'}
 				anchor='left'
 				open={open}
+				onClose={handleDrawerClose}
 			>
 				<DrawerHeader>
-					<Typography
-						variant='h6'
-						sx={{ flexGrow: 1, ml: 2 }}
-					>
-						Advanced Tech
-					</Typography>
+					<Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', ml: 1 }}>
+						<Typography
+							variant='h6'
+							sx={{ fontWeight: 600 }}
+						>
+							Advanced Tech
+						</Typography>
+					</Box>
 					<IconButton onClick={handleDrawerClose}>{theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</IconButton>
 				</DrawerHeader>
-				<Divider />
-				<List>
-					{menuItems.map((item, index) => (
-						<React.Fragment key={item.text}>
-							{!item.subItems ? (
-								<ListItem disablePadding>
-									<Link
-										href={item.path!}
-										passHref
-										legacyBehavior
-									>
-										<ListItemButton
-											selected={item.active}
-											onClick={() => handleMenuItemClick(item.text, index)}
-										>
-											<ListItemIcon>{item.icon}</ListItemIcon>
-											<ListItemText primary={item.text} />
-										</ListItemButton>
-									</Link>
-								</ListItem>
-							) : (
-								<>
-									<ListItem disablePadding>
-										<ListItemButton onClick={() => toggleSubMenu(index)}>
-											<ListItemIcon>{item.icon}</ListItemIcon>
-											<ListItemText primary={item.text} />
-											{item.open ? <ExpandLess /> : <ExpandMore />}
-										</ListItemButton>
-									</ListItem>
-									<Collapse
-										in={item.open}
-										timeout='auto'
-										unmountOnExit
-									>
-										<List
-											component='div'
-											disablePadding
-										>
-											{item.subItems.map((subItem, subIndex) => (
-												<ListItem
-													key={subItem.text}
-													disablePadding
-												>
-													<Link
-														href={subItem.path!}
-														passHref
-														legacyBehavior
-													>
-														<ListItemButton
-															sx={{ pl: 4 }}
-															selected={subItem.active}
-															onClick={() => handleSubMenuItemClick(index, subIndex)}
-														>
-															<ListItemText primary={subItem.text} />
-														</ListItemButton>
-													</Link>
-												</ListItem>
-											))}
-										</List>
-									</Collapse>
-								</>
-							)}
-						</React.Fragment>
-					))}
-				</List>
 
-				<Box sx={{ flexGrow: 1 }} />
 				<Divider />
-				<List>
-					<ListItem disablePadding>
-						<ListItemButton>
-							<ListItemIcon>
-								<SettingsIcon />
-							</ListItemIcon>
-							<ListItemText primary='Settings' />
-						</ListItemButton>
-					</ListItem>
-				</List>
+
+				<Box sx={{ overflow: 'auto', flexGrow: 1, py: 1 }}>
+					<List
+						component='nav'
+						sx={{ px: 1 }}
+					>
+						{menuItems.map((item) => (
+							<React.Fragment key={item.text}>
+								{!item.subItems ? (
+									<ListItem
+										disablePadding
+										sx={{ mb: 0.5 }}
+									>
+										<Link
+											href={item.path}
+											passHref
+											style={{ width: '100%', textDecoration: 'none', color: 'inherit' }}
+										>
+											<ListItemButton
+												sx={{
+													borderRadius: 1,
+													mb: 0.5,
+													backgroundColor: isActive(item.path) ? theme.palette.action.selected : 'transparent',
+													'&:hover': {
+														backgroundColor: isActive(item.path) ? theme.palette.action.selected : theme.palette.action.hover,
+													},
+													position: 'relative',
+													'&::before': isActive(item.path)
+														? {
+																content: '""',
+																position: 'absolute',
+																left: 0,
+																top: '20%',
+																height: '60%',
+																width: 4,
+																backgroundColor: theme.palette.primary.main,
+																borderRadius: '0 4px 4px 0',
+														  }
+														: {},
+													pl: isActive(item.path) ? 2.5 : 2,
+													transition: 'all 0.2s',
+												}}
+											>
+												<ListItemIcon
+													sx={{
+														color: isActive(item.path) ? theme.palette.primary.main : 'inherit',
+														minWidth: 40,
+													}}
+												>
+													{item.icon}
+												</ListItemIcon>
+												<ListItemText
+													primary={item.text}
+													primaryTypographyProps={{
+														fontWeight: isActive(item.path) ? 600 : 400,
+														color: isActive(item.path) ? theme.palette.primary.main : 'inherit',
+													}}
+												/>
+											</ListItemButton>
+										</Link>
+									</ListItem>
+								) : (
+									<>
+										<ListItem
+											disablePadding
+											sx={{ mb: 0.5 }}
+										>
+											<ListItemButton
+												onClick={() => handleSubMenuToggle(item.text)}
+												sx={{
+													borderRadius: 1,
+													backgroundColor: item.subItems.some((subItem) => isActive(subItem.path)) ? theme.palette.action.selected : 'transparent',
+													'&:hover': {
+														backgroundColor: theme.palette.action.hover,
+													},
+													position: 'relative',
+													'&::before': item.subItems.some((subItem) => isActive(subItem.path))
+														? {
+																content: '""',
+																position: 'absolute',
+																left: 0,
+																top: '20%',
+																height: '60%',
+																width: 4,
+																backgroundColor: theme.palette.primary.main,
+																borderRadius: '0 4px 4px 0',
+														  }
+														: {},
+													pl: item.subItems.some((subItem) => isActive(subItem.path)) ? 2.5 : 2,
+												}}
+											>
+												<ListItemIcon
+													sx={{
+														color: item.subItems.some((subItem) => isActive(subItem.path)) ? theme.palette.primary.main : 'inherit',
+														minWidth: 40,
+													}}
+												>
+													{item.icon}
+												</ListItemIcon>
+												<ListItemText
+													primary={item.text}
+													primaryTypographyProps={{
+														fontWeight: item.subItems.some((subItem) => isActive(subItem.path)) ? 600 : 400,
+														color: item.subItems.some((subItem) => isActive(subItem.path)) ? theme.palette.primary.main : 'inherit',
+													}}
+												/>
+												{openSubMenus[item.text] ? <ExpandLess sx={{ transition: 'transform 0.3s' }} /> : <ExpandMore sx={{ transition: 'transform 0.3s' }} />}
+											</ListItemButton>
+										</ListItem>
+										<Collapse
+											in={openSubMenus[item.text]}
+											timeout='auto'
+											unmountOnExit
+										>
+											<List
+												component='div'
+												disablePadding
+												sx={{ pl: 2, pr: 1 }}
+											>
+												{item.subItems.map((subItem) => (
+													<ListItem
+														key={subItem.text}
+														disablePadding
+														sx={{ mb: 0.5 }}
+													>
+														<Link
+															href={subItem.path}
+															passHref
+															style={{ width: '100%', textDecoration: 'none', color: 'inherit' }}
+														>
+															<ListItemButton
+																sx={{
+																	borderRadius: 1,
+																	pl: 2,
+																	backgroundColor: isActive(subItem.path) ? theme.palette.action.selected : 'transparent',
+																	'&:hover': {
+																		backgroundColor: isActive(subItem.path) ? theme.palette.action.selected : theme.palette.action.hover,
+																	},
+																	position: 'relative',
+																	'&::before': isActive(subItem.path)
+																		? {
+																				content: '""',
+																				position: 'absolute',
+																				left: 0,
+																				top: '20%',
+																				height: '60%',
+																				width: 4,
+																				backgroundColor: theme.palette.primary.main,
+																				borderRadius: '0 4px 4px 0',
+																		  }
+																		: {},
+																}}
+															>
+																<ListItemText
+																	primary={subItem.text}
+																	primaryTypographyProps={{
+																		fontWeight: isActive(subItem.path) ? 600 : 400,
+																		fontSize: '0.875rem',
+																		color: isActive(subItem.path) ? theme.palette.primary.main : 'inherit',
+																	}}
+																/>
+															</ListItemButton>
+														</Link>
+													</ListItem>
+												))}
+											</List>
+										</Collapse>
+									</>
+								)}
+							</React.Fragment>
+						))}
+					</List>
+				</Box>
+
+				<Divider />
+				<Box sx={{ p: 2 }}>
+					<Paper
+						elevation={0}
+						sx={{
+							p: 2,
+							borderRadius: 2,
+							backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[800],
+							cursor: 'pointer',
+							'&:hover': {
+								backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
+							},
+							transition: 'background-color 0.2s',
+						}}
+						onClick={handleUserMenuOpen}
+					>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+							<Avatar
+								sx={{
+									bgcolor: theme.palette.primary.main,
+									width: 40,
+									height: 40,
+								}}
+							>
+								JD
+							</Avatar>
+							<Box sx={{ minWidth: 0 }}>
+								<Typography
+									variant='subtitle2'
+									noWrap
+									fontWeight={600}
+								>
+									John Doe
+								</Typography>
+								<Typography
+									variant='caption'
+									color='text.secondary'
+									noWrap
+								>
+									Administrator
+								</Typography>
+							</Box>
+							<ExpandMore sx={{ ml: 'auto' }} />
+						</Box>
+					</Paper>
+				</Box>
+
+				<Menu
+					anchorEl={userMenuAnchor}
+					open={Boolean(userMenuAnchor)}
+					onClose={handleUserMenuClose}
+					PaperProps={{
+						elevation: 3,
+						sx: { width: 200 },
+					}}
+					transformOrigin={{ horizontal: 'center', vertical: 'top' }}
+					anchorOrigin={{ horizontal: 'center', vertical: 'top' }}
+					sx={{ mb: 5 }}
+				>
+					<MenuItem
+						onClick={handleUserMenuClose}
+						sx={{ gap: 1.5 }}
+					>
+						<PersonIcon fontSize='small' />
+						<Typography variant='body2'>Profile</Typography>
+					</MenuItem>
+					<Divider />
+					<MenuItem
+						onClick={handleUserMenuClose}
+						sx={{ gap: 1.5 }}
+					>
+						<LogoutIcon fontSize='small' />
+						<Typography variant='body2'>Logout</Typography>
+					</MenuItem>
+				</Menu>
 			</Drawer>
+
 			<Box
 				component='main'
 				sx={{
+					flexGrow: 1,
 					p: 3,
 					transition: theme.transitions.create('margin', {
 						easing: theme.transitions.easing.sharp,
 						duration: theme.transitions.duration.leavingScreen,
 					}),
-					flexGrow: 1,
 					marginLeft: `-${drawerWidth}px`,
 					...(open && {
 						transition: theme.transitions.create('margin', {
@@ -357,13 +542,11 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 							duration: theme.transitions.duration.enteringScreen,
 						}),
 						marginLeft: 0,
-
-						width: `calc(100% - ${drawerWidth}px)`,
 					}),
+					width: '100%',
 				}}
 			>
 				<DrawerHeader />
-
 				{children}
 			</Box>
 		</Box>

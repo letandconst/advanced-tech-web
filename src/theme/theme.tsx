@@ -41,7 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 	const theme = createTheme({
 		typography: {
-			fontFamily: "'Nunito Sans', sans-serif",
+			fontFamily: '"Nunito Sans", sans-serif',
 		},
 		palette: {
 			mode,
