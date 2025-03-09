@@ -1,63 +1,88 @@
 'use client';
 
-import React from 'react';
-import { Grid, Paper, Typography, Box, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Chip, IconButton, Tooltip, Avatar, useTheme, useMediaQuery } from '@mui/material';
-import { MoreHoriz as MoreHorizIcon, Visibility as VisibilityIcon, ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon, DirectionsCar as CarIcon, Person as PersonIcon, Build as BuildIcon } from '@mui/icons-material';
+import { useState, useEffect, ReactNode } from 'react';
+import { Grid, Paper, Typography, Box, Card, CardContent, Chip, Avatar, useTheme } from '@mui/material';
+import { ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon, DirectionsCar as CarIcon, Person as PersonIcon, Build as BuildIcon } from '@mui/icons-material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useUser } from '@/context/UserContext';
 
-// Create sample data for work requests
-interface WorkRequest {
-	id: number;
-	customer: string;
-	car: string;
-	plateNumber: string;
-	workRequested: string;
-	assignedMechanic: string;
-	status: 'Pending' | 'In Progress' | 'Completed';
-	totalCost: number;
-}
+import JobOrderDialog from '@/components/Modal/ViewJobOrder';
+import DataTable from '@/components/DataTable/DataTable';
+import { JobOrder } from '@/types/jobOrder';
+import { useJobOrderModal } from '@/hooks/useJobOrderModal';
 
-const workRequests: WorkRequest[] = [
+const jobOrders: JobOrder[] = [
 	{
-		id: 1,
-		customer: 'John Smith',
-		car: 'Toyota Camry',
-		plateNumber: 'ABC-123',
-		workRequested: 'Oil Change & Filter Replacement',
-		assignedMechanic: 'Mike Johnson',
-		status: 'Completed',
-		totalCost: 89.99,
-	},
-	{
-		id: 2,
-		customer: 'Sarah Williams',
-		car: 'Honda Civic',
-		plateNumber: 'XYZ-789',
-		workRequested: 'Brake Pad Replacement',
-		assignedMechanic: 'Robert Chen',
-		status: 'In Progress',
-		totalCost: 249.5,
-	},
-	{
-		id: 3,
-		customer: 'Michael Brown',
-		car: 'Ford F-150',
-		plateNumber: 'DEF-456',
-		workRequested: 'Engine Diagnostic',
-		assignedMechanic: 'Unassigned',
+		id: 'JO-2024-001',
+		customer: 'John Doe',
+		address: '123 Main St, Batangas',
+		make: 'Toyota Camry',
+		plate: 'XYZ-1234',
+		phone: '09123456789',
+		mechanic: 'Mike Santos',
 		status: 'Pending',
-		totalCost: 120.0,
+		remarks: 'Waiting for parts',
+		date: '2024-03-06',
+		workRequested: [
+			{ title: 'Oil Change', amount: 500 },
+			{ title: 'Brake Pad Replacement', amount: 1500 },
+		],
+		oilsAndFuels: [{ qty: 1, name: 'Engine Oil', amount: 500 }],
+		parts: [{ qty: 2, name: 'Brake Pads', amount: 1500 }],
+		laborTotal: 1000,
+		partsTotal: 1500,
+		oilTotal: 500,
+		total: 3000,
 	},
 	{
-		id: 4,
-		customer: 'Emily Johnson',
-		car: 'Nissan Altima',
-		plateNumber: 'GHI-789',
-		workRequested: 'Transmission Fluid Change',
-		assignedMechanic: 'James Wilson',
+		id: 'JO-2024-002',
+		customer: 'Sarah Williams',
+		address: '456 Oak Ave, Batangas',
+		make: 'Honda Civic',
+		plate: 'ABC-5678',
+		phone: '09187654321',
+		mechanic: 'John Smith',
 		status: 'In Progress',
-		totalCost: 179.95,
+		remarks: 'Replacing transmission',
+		date: '2024-03-07',
+		workRequested: [
+			{ title: 'Transmission Repair', amount: 3500 },
+			{ title: 'Fluid Change', amount: 800 },
+		],
+		oilsAndFuels: [
+			{ qty: 1, name: 'Transmission Fluid', amount: 800 },
+			{ qty: 1, name: 'Engine Oil', amount: 500 },
+		],
+		parts: [{ qty: 1, name: 'Transmission Kit', amount: 2500 }],
+		laborTotal: 1500,
+		partsTotal: 2500,
+		oilTotal: 1300,
+		total: 5300,
+	},
+	{
+		id: 'JO-2024-003',
+		customer: 'Michael Brown',
+		address: '789 Pine St, Batangas',
+		make: 'Ford F-150',
+		plate: 'DEF-9012',
+		phone: '09234567890',
+		mechanic: 'Maria Garcia',
+		status: 'Completed',
+		remarks: 'All work completed',
+		date: '2024-03-05',
+		workRequested: [
+			{ title: 'Brake System Overhaul', amount: 2500 },
+			{ title: 'Wheel Alignment', amount: 800 },
+		],
+		oilsAndFuels: [{ qty: 1, name: 'Brake Fluid', amount: 300 }],
+		parts: [
+			{ qty: 4, name: 'Brake Pads', amount: 2000 },
+			{ qty: 2, name: 'Brake Rotors', amount: 1500 },
+		],
+		laborTotal: 1800,
+		partsTotal: 3500,
+		oilTotal: 300,
+		total: 5600,
 	},
 ];
 
@@ -72,25 +97,11 @@ const monthlyServiceData = [
 	{ name: 'Jul', services: 40, revenue: 2800 },
 ];
 
-// Helper function to get status chip color
-const getStatusColor = (status: string) => {
-	switch (status) {
-		case 'Pending':
-			return 'warning';
-		case 'In Progress':
-			return 'info';
-		case 'Completed':
-			return 'success';
-		default:
-			return 'default';
-	}
-};
-
 // Clock component
 function Clock() {
-	const [time, setTime] = React.useState(new Date());
+	const [time, setTime] = useState(new Date());
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const timer = setInterval(() => {
 			setTime(new Date());
 		}, 1000);
@@ -144,7 +155,7 @@ interface KpiCardProps {
 	change: string;
 	isPositive: boolean;
 	color: string;
-	icon: React.ReactNode;
+	icon: ReactNode;
 }
 
 const KpiCard = ({ title, value, change, isPositive, color, icon }: KpiCardProps) => {
@@ -218,17 +229,39 @@ const KpiCard = ({ title, value, change, isPositive, color, icon }: KpiCardProps
 
 export default function Dashboard() {
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-	const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
 	const { user } = useUser();
 
-	const handleViewDetail = (id: number) => {
-		console.log(`View details for request ID: ${id}`);
-		// In a real application, this would navigate to a detail page
+	const { viewOrder, handleViewOpen, handleViewClose, handlePrint } = useJobOrderModal();
+
+	const actions = {
+		view: handleViewOpen,
 	};
 
-	// Mock user data
-	const userName = user?.firstName;
+	const columns = [
+		{ id: 'id', label: 'ID' },
+		{
+			id: 'vehicle',
+			label: 'Vehicle',
+			render: (row: JobOrder) => `${row.make} - ${row.plate}`,
+		},
+		{
+			id: 'workRequested',
+			label: 'Work Requested',
+			render: (row: JobOrder) => row.workRequested.map((item) => item.title).join(', '),
+		},
+		{
+			id: 'status',
+			label: 'Status',
+			render: (row: JobOrder) => (
+				<Chip
+					label={row.status}
+					color={row.status === 'Pending' ? 'warning' : row.status === 'In Progress' ? 'primary' : 'success'}
+					size='small'
+				/>
+			),
+		},
+		{ id: 'mechanic', label: 'Mechanic' },
+	];
 
 	return (
 		<Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -265,7 +298,7 @@ export default function Dashboard() {
 									fontWeight='bold'
 									gutterBottom
 								>
-									Hi, {userName}!
+									Hi, {user && user?.firstName}!
 								</Typography>
 								<Typography variant='body1'>Here&apos;s what&apos;s happening in your service center today.</Typography>
 							</Grid>
@@ -419,145 +452,25 @@ export default function Dashboard() {
 					item
 					xs={12}
 				>
-					<Paper
-						elevation={2}
-						sx={{ p: 3, borderRadius: 2 }}
+					<Typography
+						variant='h6'
+						fontWeight='bold'
+						sx={{ mb: 3 }}
 					>
-						<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-							<Typography
-								variant='h6'
-								fontWeight='bold'
-							>
-								Recent Work Requests
-							</Typography>
-							<Button
-								variant='contained'
-								endIcon={<MoreHorizIcon />}
-								color='primary'
-								size='small'
-								sx={{ borderRadius: 2 }}
-							>
-								View All
-							</Button>
-						</Box>
-						<TableContainer
-							sx={{
-								maxHeight: 400,
-								'&::-webkit-scrollbar': {
-									width: '8px',
-									height: '8px',
-								},
-								'&::-webkit-scrollbar-thumb': {
-									backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-									borderRadius: '4px',
-								},
-								'&::-webkit-scrollbar-track': {
-									backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-								},
-							}}
-						>
-							<Table
-								stickyHeader
-								aria-label='work requests table'
-							>
-								<TableHead>
-									<TableRow>
-										<TableCell sx={{ fontWeight: 'bold' }}>Customer</TableCell>
-										{!isSmall && <TableCell sx={{ fontWeight: 'bold' }}>Car / Plate</TableCell>}
-										<TableCell sx={{ fontWeight: 'bold' }}>Work Requested</TableCell>
-										{!isMobile && <TableCell sx={{ fontWeight: 'bold' }}>Mechanic</TableCell>}
-										<TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-										<TableCell
-											align='right'
-											sx={{ fontWeight: 'bold' }}
-										>
-											Total
-										</TableCell>
-										<TableCell
-											align='center'
-											sx={{ fontWeight: 'bold' }}
-										>
-											Action
-										</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{workRequests.map((request) => (
-										<TableRow
-											key={request.id}
-											sx={{
-												'&:hover': {
-													backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-												},
-												transition: 'background-color 0.2s',
-											}}
-										>
-											<TableCell>{request.customer}</TableCell>
-											{!isSmall && (
-												<TableCell>
-													<Typography variant='body2'>{request.car}</Typography>
-													<Typography
-														variant='caption'
-														display='block'
-														color='text.secondary'
-													>
-														{request.plateNumber}
-													</Typography>
-												</TableCell>
-											)}
-											<TableCell>
-												<Tooltip
-													title={request.workRequested}
-													arrow
-												>
-													<Typography
-														variant='body2'
-														sx={{
-															maxWidth: { xs: '120px', sm: '200px', md: '300px' },
-															overflow: 'hidden',
-															textOverflow: 'ellipsis',
-															whiteSpace: 'nowrap',
-														}}
-													>
-														{request.workRequested}
-													</Typography>
-												</Tooltip>
-											</TableCell>
-											{!isMobile && <TableCell>{request.assignedMechanic}</TableCell>}
-											<TableCell>
-												<Chip
-													label={request.status}
-													// eslint-disable-next-line @typescript-eslint/no-explicit-any
-													color={getStatusColor(request.status) as any}
-													size='small'
-													sx={{ fontWeight: 'medium', borderRadius: '4px' }}
-												/>
-											</TableCell>
-											<TableCell align='right'>&#8369; {request.totalCost.toFixed(2)}</TableCell>
-											<TableCell align='center'>
-												<Tooltip
-													title='View Details'
-													arrow
-												>
-													<IconButton
-														color='primary'
-														size='small'
-														onClick={() => handleViewDetail(request.id)}
-														sx={{
-															transition: 'transform 0.2s',
-															'&:hover': { transform: 'scale(1.1)' },
-														}}
-													>
-														<VisibilityIcon />
-													</IconButton>
-												</Tooltip>
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-						</TableContainer>
-					</Paper>
+						Recent Job Orders
+					</Typography>
+
+					<DataTable<JobOrder>
+						columns={columns}
+						rows={jobOrders}
+						actions={actions}
+					/>
+
+					<JobOrderDialog
+						viewOrder={viewOrder}
+						handleClose={handleViewClose}
+						handlePrint={handlePrint}
+					/>
 				</Grid>
 			</Grid>
 		</Box>
