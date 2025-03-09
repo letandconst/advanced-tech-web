@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 import { styled, useTheme } from '@mui/material/styles';
 import { useThemeContext } from '@/theme/theme';
 import { useUser } from '@/context/UserContext';
-
+import ProfileAvatar from '@/components/Avatar/Avatar';
 // MUI Components
-import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Tooltip, Avatar, Menu, MenuItem, useMediaQuery, Badge, Paper } from '@mui/material';
+import { Box, Drawer, CssBaseline, Toolbar, List, Typography, Divider, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse, Tooltip, Menu, MenuItem, useMediaQuery, Badge, Paper } from '@mui/material';
 
 import MuiAppBar, { type AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 
@@ -465,15 +465,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 						onClick={handleUserMenuOpen}
 					>
 						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-							<Avatar
-								sx={{
-									bgcolor: theme.palette.primary.main,
-									width: 40,
-									height: 40,
-								}}
-							>
-								JD
-							</Avatar>
+							{user && <ProfileAvatar user={user} />}
 							<Box sx={{ minWidth: 0 }}>
 								<Typography
 									variant='subtitle2'
