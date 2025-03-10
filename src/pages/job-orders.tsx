@@ -33,10 +33,11 @@ import {
 	CardContent,
 	useTheme,
 	alpha,
+	Collapse,
 } from '@mui/material';
-import { Add, Search, FilterList, Close, CheckCircle, HourglassEmpty, Build } from '@mui/icons-material';
+import { Add, Search, FilterList, Close } from '@mui/icons-material';
 
-import JobOrderDialog from '@/components/Modal/ViewJobOrder';
+import JobOrderDialog from '@/components/Modal/job-orders/ViewJobOrder';
 import DataTable from '@/components/DataTable/DataTable';
 import { JobOrder } from '@/types/jobOrder';
 import { Column } from '@/types/table';
@@ -193,6 +194,11 @@ const JobOrdersPage = () => {
 	const [mechanicFilter, setMechanicFilter] = useState('All');
 	const [showFilters, setShowFilters] = useState(false);
 
+	const resetFilters = () => {
+		setStatusFilter('All');
+		setMechanicFilter('All');
+	};
+
 	// State for dialogs
 	const [newOrderOpen, setNewOrderOpen] = useState(false);
 
@@ -275,6 +281,7 @@ const JobOrdersPage = () => {
 
 	// Handle opening the delete confirmation dialog
 	const handleDeleteConfirmOpen = (id: string) => {
+		console.log('id', id);
 		setOrderToDelete(id);
 		setDeleteConfirmOpen(true);
 	};
@@ -568,7 +575,7 @@ const JobOrdersPage = () => {
 	const actions = {
 		view: handleViewOpen,
 		edit: handleEditOpen,
-		delete: handleDeleteConfirmOpen,
+		delete: (order: JobOrder) => handleDeleteConfirmOpen(order.id),
 	};
 
 	return (
@@ -649,17 +656,20 @@ const JobOrdersPage = () => {
 					</Grid>
 				</Grid>
 
-				{/* Filter options */}
-				{showFilters && (
-					<Box sx={{ mt: 2, p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05), borderRadius: 1 }}>
+				<Collapse
+					in={showFilters}
+					timeout={300}
+				>
+					<Box sx={{ mt: 2, position: 'relative', zIndex: 1 }}>
 						<Grid
 							container
 							spacing={2}
+							alignItems='center'
 						>
 							<Grid
 								item
 								xs={12}
-								sm={6}
+								md={5}
 							>
 								<FormControl
 									fullWidth
@@ -686,7 +696,7 @@ const JobOrdersPage = () => {
 							<Grid
 								item
 								xs={12}
-								sm={6}
+								md={5}
 							>
 								<FormControl
 									fullWidth
@@ -710,9 +720,33 @@ const JobOrdersPage = () => {
 									</Select>
 								</FormControl>
 							</Grid>
+							<Grid
+								item
+								xs={12}
+								md={2}
+								sx={{ display: 'flex', justifyContent: 'flex-end' }}
+							>
+								<Button
+									variant='outlined'
+									color='error'
+									onClick={resetFilters}
+									sx={{
+										borderRadius: 1,
+										display: 'flex',
+										alignItems: 'center',
+										gap: 1,
+										width: '100%',
+									}}
+								>
+									<Close fontSize='small' />
+									Reset
+								</Button>
+							</Grid>
 						</Grid>
 					</Box>
-				)}
+				</Collapse>
+
+				{/* Filter options */}
 			</Box>
 			{/* Job Orders Table */}
 			<DataTable<JobOrder>
@@ -1330,6 +1364,7 @@ const JobOrdersPage = () => {
 					)}
 				</DialogActions>
 			</Dialog>
+
 			<Dialog
 				open={Boolean(editOrder)}
 				onClose={handleEditClose}

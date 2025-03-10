@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { JobOrder } from '@/types/jobOrder'; // Adjust this path to your JobOrder type
+import { JobOrder } from '@/types/jobOrder';
 
 export const useJobOrderModal = () => {
 	const [viewOrder, setViewOrder] = useState<JobOrder | null>(null);

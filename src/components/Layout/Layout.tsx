@@ -66,7 +66,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 const menuItems = [
 	{ text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
 	{ text: 'Job Orders', icon: <BuildIcon />, path: '/job-orders' },
-	{ text: 'Invoices', icon: <BarChartIcon />, path: '/invoices' },
+	// { text: 'Invoices', icon: <BarChartIcon />, path: '/invoices' },
 	{ text: 'Services', icon: <LayersIcon />, path: '/services' },
 	{
 		text: 'Management',

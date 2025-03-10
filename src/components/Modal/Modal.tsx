@@ -19,7 +19,7 @@ export default function ModalComponent(props: ModalProps) {
 			open={open}
 			onClose={onClose}
 			fullWidth
-			maxWidth='sm'
+			maxWidth='md'
 		>
 			<DialogTitle>{title}</DialogTitle>
 			<DialogContent dividers>{children}</DialogContent>

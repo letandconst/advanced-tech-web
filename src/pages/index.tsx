@@ -6,10 +6,11 @@ import { ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon, Dir
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useUser } from '@/context/UserContext';
 
-import JobOrderDialog from '@/components/Modal/ViewJobOrder';
+import JobOrderDialog from '@/components/Modal/job-orders/ViewJobOrder';
 import DataTable from '@/components/DataTable/DataTable';
 import { JobOrder } from '@/types/jobOrder';
 import { useJobOrderModal } from '@/hooks/useJobOrderModal';
+import { Column } from '@/types/table';
 
 const jobOrders: JobOrder[] = [
 	{
@@ -237,12 +238,22 @@ export default function Dashboard() {
 		view: handleViewOpen,
 	};
 
-	const columns = [
+	const columns: Column<JobOrder>[] = [
 		{ id: 'id', label: 'ID' },
 		{
-			id: 'vehicle',
+			id: 'make',
 			label: 'Vehicle',
-			render: (row: JobOrder) => `${row.make} - ${row.plate}`,
+			render: (row) => (
+				<Box>
+					<Typography variant='body2'>{row.make}</Typography>
+					<Typography
+						variant='caption'
+						color='text.secondary'
+					>
+						{row.plate}
+					</Typography>
+				</Box>
+			),
 		},
 		{
 			id: 'workRequested',
