@@ -19,7 +19,7 @@ import {
 	ChevronRight as ChevronRightIcon,
 	Dashboard as DashboardIcon,
 	People as PeopleIcon,
-	BarChart as BarChartIcon,
+	// BarChart as BarChartIcon,
 	Layers as LayersIcon,
 	Logout as LogoutIcon,
 	ExpandLess,

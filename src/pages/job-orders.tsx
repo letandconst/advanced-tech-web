@@ -32,7 +32,6 @@ import {
 	Card,
 	CardContent,
 	useTheme,
-	alpha,
 	Collapse,
 } from '@mui/material';
 import { Add, Search, FilterList, Close } from '@mui/icons-material';
@@ -108,8 +107,6 @@ const mechanics = ['Mike Santos', 'John Smith', 'Maria Garcia', 'Robert Chen', '
 const statusOptions = ['Pending', 'In Progress', 'Completed'];
 
 const JobOrdersPage = () => {
-	const theme = useTheme();
-
 	const { viewOrder, handleViewOpen, handleViewClose, handlePrint } = useJobOrderModal();
 
 	// Sample job orders data
