@@ -1,20 +1,11 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Chip, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, OutlinedInput, FormHelperText, Stack, IconButton } from '@mui/material';
+import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, OutlinedInput, FormHelperText, Stack, IconButton } from '@mui/material';
 import { Add, Visibility, VisibilityOff } from '@mui/icons-material';
 import { auth, db } from '@/services/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, set } from 'firebase/database';
-
-interface User {
-	id: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	status: 'active' | 'inactive';
-	contactNumber?: string;
-}
 
 interface UserFormData {
 	firstName: string;
