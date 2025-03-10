@@ -98,12 +98,12 @@ const Mechanics = () => {
 							<TableRow key={mechanic.id}>
 								<TableCell>{mechanic.name}</TableCell>
 								<TableCell>
-									<img
+									{/* <img
 										src={mechanic.image}
 										alt={mechanic.name}
 										width={50}
 										height={50}
-									/>
+									/> */}
 								</TableCell>
 								<TableCell>{mechanic.address}</TableCell>
 								<TableCell>{mechanic.phone}</TableCell>
@@ -207,12 +207,12 @@ const Mechanics = () => {
 					{viewing && (
 						<>
 							<Typography>Name: {viewing.name}</Typography>
-							<img
+							{/* <img
 								src={viewing.image}
 								alt={viewing.name}
 								width={100}
 								height={100}
-							/>
+							/> */}
 							<Typography>Address: {viewing.address}</Typography>
 							<Typography>Phone: {viewing.phone}</Typography>
 							<Typography>Remarks: {viewing.remarks}</Typography>

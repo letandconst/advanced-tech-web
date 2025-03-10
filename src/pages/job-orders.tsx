@@ -31,7 +31,6 @@ import {
 	Tab,
 	Card,
 	CardContent,
-	useTheme,
 	Collapse,
 } from '@mui/material';
 import { Add, Search, FilterList, Close } from '@mui/icons-material';
