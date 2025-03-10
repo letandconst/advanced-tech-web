@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, InputAdornment, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, FormControl, InputLabel, Select, MenuItem, Grid, InputAdornment, Typography, SelectChangeEvent } from '@mui/material';
 import type { Service } from '@/types/table';
 
 interface ServiceModalProps {
@@ -46,7 +46,7 @@ const ServiceModal = ({ open, onClose, onSave, service, categories }: ServiceMod
 		});
 	}, [service, open]);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
 		const { name, value } = e.target;
 		if (name) {
 			setFormData({
