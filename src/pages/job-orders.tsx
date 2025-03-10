@@ -677,7 +677,7 @@ const JobOrdersPage = () => {
 										label='Status'
 										onChange={(e) => setStatusFilter(e.target.value)}
 									>
-										<MenuItem value='All'>All Statuses</MenuItem>
+										<MenuItem value='All'>All </MenuItem>
 										{statusOptions.map((status) => (
 											<MenuItem
 												key={status}
@@ -741,8 +741,6 @@ const JobOrdersPage = () => {
 						</Grid>
 					</Box>
 				</Collapse>
-
-				{/* Filter options */}
 			</Box>
 			{/* Job Orders Table */}
 			<DataTable<JobOrder>

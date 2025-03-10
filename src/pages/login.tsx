@@ -95,7 +95,7 @@ export default function LoginPage() {
 						variant='subtitle1'
 						color='text.secondary'
 					>
-						formerly ANTE MOTOR
+						formerly ANTE MOTOR SHOP
 					</Typography>
 				</Box>
 

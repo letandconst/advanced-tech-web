@@ -267,21 +267,19 @@ const ServicesPage = () => {
 								<FormControl
 									fullWidth
 									size='small'
-									sx={{ bgcolor: 'white' }}
 								>
-									<InputLabel id='category-filter-label'>Category</InputLabel>
+									<InputLabel>Category</InputLabel>
 									<Select
-										labelId='category-filter-label'
-										id='category-filter'
 										value={categoryFilter}
 										label='Category'
 										onChange={handleCategoryChange}
-										MenuProps={{
-											sx: { zIndex: 9999 },
-											disablePortal: false,
-										}}
 									>
-										<MenuItem value=''>All Categories</MenuItem>
+										<MenuItem
+											value=''
+											disabled
+										>
+											Select a Category
+										</MenuItem>
 										{categories.map((category) => (
 											<MenuItem
 												key={category}
@@ -301,21 +299,13 @@ const ServicesPage = () => {
 								<FormControl
 									fullWidth
 									size='small'
-									sx={{ bgcolor: 'white' }}
 								>
-									<InputLabel id='price-sort-label'>Price</InputLabel>
+									<InputLabel>Price</InputLabel>
 									<Select
-										labelId='price-sort-label'
-										id='price-sort'
 										value={priceSort}
 										label='Price'
 										onChange={handlePriceSortChange}
-										MenuProps={{
-											sx: { zIndex: 9999 },
-											disablePortal: false,
-										}}
 									>
-										<MenuItem value=''>Default</MenuItem>
 										<MenuItem value='highToLow'>Highest to Lowest</MenuItem>
 										<MenuItem value='lowToHigh'>Lowest to Highest</MenuItem>
 									</Select>
